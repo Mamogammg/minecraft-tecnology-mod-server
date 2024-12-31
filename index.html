@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Log in to continue.</title>
+  <meta charset = "utf-8">
+  <base href="http://192.168.1.144:6000/">
+  <style>
+        .corner {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+  <div id="setName" style="display: none;">
+    <input type="text" id="name">
+    <button id="submit">Submit</button>
+  </div>
+  <div id="lastStep" style="display: none;">
+    <p id="showName"></p>
+    <p id="code"></p>
+  </div>
+  <div id="mobile" style="display: none;">
+    <p style="font-size: 50px;" id="instructions">
+      Instructions: \::\
+      1. Go to your computer and go to the same address in here. \::\
+      2. Put it your name. \::\
+      3. Put here the code in the computer's screen.
+    </p>
+    <div>
+      <input type="text" id="1" style="width: 50px; height: 50px; border: none; padding: 0px 0px; display: inline-block; font-size: 50px;">
+      <input type="text" id="2" style="width: 50px; height: 50px; border: none; padding: 0px 0px; display: inline-block; font-size: 50px;">
+      <input type="text" id="3" style="width: 50px; height: 50px; border: none; padding: 0px 0px; display: inline-block; font-size: 50px;">
+      <input type="text" id="4" style="width: 50px; height: 50px; border: none; padding: 0px 0px; display: inline-block; font-size: 50px;">
+      <input type="text" id="5" style="width: 50px; height: 50px; border: none; padding: 0px 0px; display: inline-block; font-size: 50px;">
+      <input type="text" id="6" style="width: 50px; height: 50px; border: none; padding: 0px 0px; display: inline-block; font-size: 50px;">
+      <button id="send" style="height: 50px; width: 90px; font-size: 20px; bottom: 10px; position: relative;">Send</button>
+    </div>
+    <p id="ad" style="font-size: 50px;"></p>
+  </div>
+  <script>
+    function random(digits) {
+      var list = ["1","2","3","4","5","6","7","8","9","0","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
+      var code = ""
+      for (let i=0;i<digits;i++) {
+        code = code + list[Math.floor(Math.random()*36)]
+      }
+      return code;
+    }    
+
+    const url = new URL(window.location.href);
+
+    if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
+      document.getElementById("mobile").style.display = "block"
+    } else {
+      if (url.searchParams.get("u")) {
+        document.getElementById("lastStep").style.display = "block"
+        var code = random(6)
+        document.getElementById("code").innerText = code
+        var body = {}
+        body[code] = url.searchParams.get("u")
+        fetch("http://192.168.1.144:8000/data", {
+          method: "POST",
+          body: JSON.stringify(body)
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Error en la solicitud al servidor');
+          }
+          console.log('Solicitud al servidor exitosa');
+        })
+      } else {
+        document.getElementById("setName").style.display = "block"
+      }
+    }
+    
+    document.getElementById("submit").addEventListener("click", function() {      
+      url.searchParams.set("u", document.getElementById("name").value)
+      
+      window.location.href = url.toString();
+    })
+
+    document.getElementById("send").addEventListener("click", function() {
+      fetch("http://192.168.1.144:8000/data", {
+          method: "GET"
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Error en la solicitud al servidor');
+          }
+          console.log('Solicitud al servidor exitosa');
+
+          var body;
+          response = response.json().then((value) => {
+            console.log(value)
+            body = value
+            //console.log(response)
+
+            var code = [document.getElementById("1").value,document.getElementById("2").value,document.getElementById("3").value,document.getElementById("4").value,document.getElementById("5").value,document.getElementById("6").value]
+
+            name = body[code.join("")]
+
+            if(name=="undefined") {
+              document.getElementById("ad").innerText = "this code is not valid."
+            } else {
+              document.getElementById("ad").innerText = "hi, " + name + "."
+            }          
+          })
+        })
+    })
+
+    document.addEventListener("DOMContentLoaded", function() {
+      document.getElementById("instructions").innerText = document.getElementById("instructions").innerText.replaceAll("\\::\\","\n")
+    })
+
+    document.getElementById("1").addEventListener("input", function() {
+      document.getElementById("1").value = document.getElementById("1").value.toUpperCase()
+      var input = document.getElementById("2")
+      input.select()
+      input.focus()
+    })
+    document.getElementById("2").addEventListener("input", function() {
+      document.getElementById("2").value = document.getElementById("2").value.toUpperCase()
+      var input = document.getElementById("3")
+      input.select()
+      input.focus()
+    })
+    document.getElementById("3").addEventListener("input", function() {
+      document.getElementById("3").value = document.getElementById("3").value.toUpperCase()
+      var input = document.getElementById("4")
+      input.select()
+      input.focus()
+    })
+    document.getElementById("4").addEventListener("input", function() {
+      document.getElementById("4").value = document.getElementById("4").value.toUpperCase()
+      var input = document.getElementById("5")
+      input.select()
+      input.focus()
+    })
+    document.getElementById("5").addEventListener("input", function() {
+      document.getElementById("5").value = document.getElementById("5").value.toUpperCase()
+      var input = document.getElementById("6")
+      input.select()
+      input.focus()
+    })
+  </script>
+</body>
+</html>
